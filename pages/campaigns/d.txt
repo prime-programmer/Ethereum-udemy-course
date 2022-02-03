@@ -1,0 +1,194 @@
+import React, {Component} from 'react';
+import Layout from '../../components/Layout';
+import { Button, Form, Input, Message } from 'semantic-ui-react';
+import factory from '../../ethereum/factory';
+import web3 from '../../ethereum/web3';
+
+
+class CampaignNew extends Component {
+    state = {
+        minimumContribution: '',
+
+        errorMessage: ''
+      };
+
+      createCampaign = async (event) => {
+        event.preventDefault();
+
+        try {
+        const accounts = await web3.eth.getAccounts();
+
+        await factory.methods.createCampaign(this.state.minimumContribution).send({
+          from: accounts[0]
+        });
+      
+    } catch (err) {
+        this.setState({ errorMessage: err.message });
+    }
+};
+
+    render() {
+        return (
+        <Layout>
+        <h1>New Campaign</h1>
+
+        <Form onSubmit={this.createCampaign} error={this.state.errorMessage}>
+            <Form.Field>
+                <label>Minimum Contribution</label>
+                <Input 
+                label="wei" 
+                labelPosition="right"
+                value={this.state.minimumContribution}
+                onChange={event => this.setState({minimumContribution: event.target.value})}
+                />
+            </Form.Field>
+
+            <Message error header="An error has occurred" content={this.state.errorMessage} />
+            <Button primary>Create</Button>
+        </Form>
+        </Layout>
+        );
+    }
+}
+export default CampaignNew;
+
+//////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
+
+import React, { Component } from 'react'
+import { Button, Form, Input, Grid, Message } from 'semantic-ui-react'
+import Layout from '../../components/Layout'
+import factory from '../../ethereum/factory'
+import web3 from '../../ethereum/web3'
+import { Router } from '../../routes'
+
+export class New extends Component {
+  state = {
+    minimumContribution: '',
+    errorMessage: '',
+    loading: false
+  }
+
+  constructor(props) {
+    super(props);
+    this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  onSubmit = async event => {
+    event.preventDefault()
+    const accounts = await web3.eth.getAccounts()
+    this.setState({ loading: true, errorMessage: '' })
+    
+    try {
+      await factory.methods.createCampaign(this.state.minimumContribution).send({
+        from: accounts[0]
+      });
+
+      Router.pushRoute('/')
+    } catch (error) {
+      this.setState({ errorMessage: error.message })
+    }
+    this.setState({ loading: false })
+  }
+
+  render() {
+    const { errorMessage, loading } = this.state
+    return (
+      <Layout>
+        <Grid centered columns={2}>
+          <Grid.Column>
+            <h3>Create a Campaign.</h3>
+            <Form onSubmit={this.onSubmit} error={!!errorMessage}>
+              <Form.Field>
+                <lable>Minimum Contribution </lable>
+                <Input
+                  label="WEI"
+                  labelPosition="right"
+                  value={this.state.minimumContribution}
+                  onChange={event=>this.setState({minimumContribution:event.target.value})}
+                />
+              </Form.Field>
+              <Message error header="Oops!" content={errorMessage}/>
+              <Button loading={loading} primary>Create</Button>
+            </Form>
+          </Grid.Column>
+        </Grid>
+      </Layout>
+    )
+  }
+}
+
+export default New
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+import React, {Component} from 'react';
+import { Button, Card, Message } from 'semantic-ui-react';
+import factory from '../ethereum/factory';
+import Layout from '../components/Layout';
+
+
+class CampaignIndex extends Component {
+    static async getInitialProps() {
+        const campaigns = await factory.methods.getDeployedCampaigns().call();
+        return { campaigns };  
+    }
+    
+    
+    renderCampaigns() {
+        const items = this.props.campaigns.map(address => {
+            return {
+                header: address,
+                description: <a>View Campaign</a>,
+                fluid: true
+        
+    };
+});
+
+return <Card.Group items={items} />;
+}
+
+render () {
+    return (
+    <Layout>
+    <div>
+    
+    <h3> Open Campaign</h3>
+    
+    <Button
+        floated='right'
+        content="Create Campaign"
+        icon="add circle"
+        primary={true}
+    />
+
+    {this.renderCampaigns()}
+    </div>
+    </Layout>
+        );
+    
+    }
+}
+    
+export default CampaignIndex;
+
+///////////////////////////////////////////////////////////////////
+
+constructor(props) {
+    super(props);
+    this.onSubmit = this.onSubmit.bind(this);
+  }
+
+///////////////////////////////////////////////////////////////////
+  import React from "react";
+
+class RequestNew extends React.Component{
+    render () {
+        return (
+            <h3>Make Request</h3>
+        );
+    }
+}
+export default RequestNew;
